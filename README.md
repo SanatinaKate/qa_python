@@ -21,6 +21,6 @@
 - test_delete_book_from_favorites_for_unfavorite_book - тест на удаление неизбранной книги из списка Избранного
 - test_get_list_of_favorites_books_check_result - тест на проверку возаращаемого списка Избранного
 
-Файл conftest.py содержит следующие фикстуры для тестов из класса TestBooksCollector:
-- books - фикстура на создание тестового словаря с книгами
-- collector - фикстура на создание экземпляра класса BooksCollector
+Файл conftest.py содержит фикстуры для тестов из класса TestBooksCollector
+
+Файл data_for_tests.py содержит класс DataForTests со статическими данными для тестов из класса TestBooksCollector

@@ -1,3 +1,4 @@
+from data_for_tests import DataForTests
 import pytest
 
 
@@ -70,7 +71,7 @@ class TestBooksCollector:
         collector.set_book_genre(name, genre)
 
         # проверяем, что установился заданный жанр
-        assert  collector.books_genre[name] == genre
+        assert collector.books_genre[name] == genre
 
     # Установка неизвестноо жанра для добавленной книги
     @pytest.mark.parametrize("genre", ['Драмы', 'Поэмы', 'Стихи'])
@@ -85,8 +86,25 @@ class TestBooksCollector:
         assert collector.books_genre['Евгений Онегин'] == ''
 
     # Проверка возврращаемого значения жанра книги
-    def test_get_book_genre_check_result(self, books, collector):
+    def test_get_book_genre_check_result(self, collector):
         # добавляем книги из тестового словаря
+        books = DataForTests.books
+        for name in books.keys():
+            collector.add_new_book(name)
+
+        # устанавливаем жанр для каждой добавленной книги
+        for name, genre in books.items():
+            collector.books_genre[name] = genre
+
+        # получаем жанр каждой добавленной книги и проверяем правильность реультата
+        for name, genre in books.items():
+            assert collector.get_book_genre(name) == genre
+
+    # Проверка возвращвемого списка книг с заданным жанром
+    @pytest.mark.parametrize("specific_genre", ['Детективы', 'Комедии', 'Сказки', 'Ужасы', 'Фантастика'])
+    def test_get_books_with_specific_genre_check_result(self, collector, specific_genre):
+        # добавляем книги из тестового словаря
+        books = DataForTests.books
         for name in books.keys():
             collector.add_new_book(name)
 
@@ -94,63 +112,33 @@ class TestBooksCollector:
         for name, genre in books.items():
             collector.set_book_genre(name, genre)
 
-        # получаем жанр каждой добавленной книги и проверяем правильность реультата
-        for name, genre in books.items():
-            genre_expected = genre if genre in collector.genre else ''
-            assert collector.get_book_genre(name) == genre_expected
-
-    # Проверка возвращвемого списка книг с заданным жанром
-    @pytest.mark.parametrize("specific_genre", ['Детективы', 'Комедии', 'Сказки', 'Ужасы', 'Фантастика'])
-    def test_get_books_with_specific_genre_check_result(self, books, collector, specific_genre):
-        # добавляем книги из тестового словаря
-        for name in books.keys():
-            collector.add_new_book(name)
-
-        # устанавливаем жанр для каждой добавленной книги и формируем ожидаемый список книг
-        books_expected = []
-        for name, genre in books.items():
-            collector.set_book_genre(name, genre)
-            if (genre == specific_genre) and (genre in collector.genre):
-                books_expected.append(name)
-
         # получаем список книг с заданным жарном и проверям правильность результата
-        assert collector.get_books_with_specific_genre(specific_genre) == books_expected
+        books_with_specific_genre = DataForTests.books_with_specific_genre[specific_genre]
+        assert collector.get_books_with_specific_genre(specific_genre) == books_with_specific_genre
 
     # Проверка возвращаемого словаря с жанрами книг
-    def test_get_books_genre_check_result(self, books, collector):
-        # добавляем книги из тестового словаря и формируем ожидаемый словарь
-        books_expected = {}
-        for name in books.keys():
-            collector.add_new_book(name)
-            books_expected[name] = ''
+    def test_get_books_genre_check_result(self, collector):
+        # инициализируем словарь с жанрами книг
+        books = DataForTests.books
+        collector.books_genre = dict(books)
 
-        # получаем словарь с пустыми жанрами добавленных книг и проверяем правильность результата
-        assert collector.get_books_genre() == books_expected
-
-        # устанавливаем жанр для каждой добавленной книги и обновляем ожидаемый словарь
-        for name, genre in books.items():
-            collector.set_book_genre(name, genre)
-            if genre in collector.genre:
-                books_expected[name] = genre
-
-        # получаем словарь с установленными жанрами книг и проверяем правильность результата
-        assert collector.get_books_genre() == books_expected
+        # получаем словарь с жанрами книг и проверяем правильность результата
+        assert collector.get_books_genre() == books
 
     # Проверка возвращаемоо списка книг, подходящих детям
-    def test_get_books_for_children_check_result(self, books, collector):
+    def test_get_books_for_children_check_result(self, collector):
         # добавляем книги из тестового словаря
+        books = DataForTests.books
         for name in books.keys():
             collector.add_new_book(name)
 
-        # устанавливаем жанр для каждой добавленной книги и формируем ожидаемый список книг
-        books_expected = []
+        # устанавливаем жанр для каждой добавленной книги
         for name, genre in books.items():
             collector.set_book_genre(name, genre)
-            if (genre not in collector.genre_age_rating) and (genre in collector.genre):
-                books_expected.append(name)
 
         # получаем список книг, подходящих детям, и проверям правильность результата
-        assert collector.get_books_for_children() == books_expected
+        books_for_children = DataForTests.books_for_children
+        assert collector.get_books_for_children() == books_for_children
 
     # Добавление двух различных книг в список Избранного
     def test_add_book_in_favorites_for_two_different_books(self, collector):
@@ -163,7 +151,7 @@ class TestBooksCollector:
             collector.add_book_in_favorites(name)
 
         # проверяем, что в список Избранного добавились две книги
-        assert len(collector.get_list_of_favorites_books()) == 2
+        assert len(collector.favorites) == 2
 
     # Добавление уже добавленной книги в список Избранного
     def test_add_book_in_favorites_for_already_favorite_book(self, collector):
@@ -177,7 +165,7 @@ class TestBooksCollector:
         collector.add_book_in_favorites('Война и мир')
 
         # проверяем, что в список Избранного добавилась одна книга
-        assert len(collector.get_list_of_favorites_books()) == 1
+        assert len(collector.favorites) == 1
 
     # Удаление избранной книги из списка Избранного
     def test_delete_book_from_favorites_for_favorite_book(self, collector):
@@ -193,7 +181,7 @@ class TestBooksCollector:
         collector.delete_book_from_favorites('Гарри Поттер')
 
         # проверяем,что с списке Избранного нет удаленной книги
-        assert 'Гарри Поттер' not in collector.get_list_of_favorites_books()
+        assert 'Гарри Поттер' not in collector.favorites
 
     # Удаление неизбранной книги из списка Избранного
     def test_delete_book_from_favorites_for_unfavorite_book(self, collector):
@@ -208,21 +196,14 @@ class TestBooksCollector:
         collector.delete_book_from_favorites('Властелин колец')
 
         # проверяем,что с списке Избранного осталась книга
-        assert 'Гарри Поттер' in collector.get_list_of_favorites_books()
+        assert 'Гарри Поттер' in collector.favorites
 
     # Проверка возаращаемого списка Избранного
     @pytest.mark.parametrize("specific_genre", ['Детективы', 'Комедии', 'Фантастика'])
-    def test_get_list_of_favorites_books_check_result(self, books, collector, specific_genre):
-        # добавляем книги из тестового словаря
-        for name in books.keys():
-            collector.add_new_book(name)
-
-        # добавляем книги с заданным жанром в список Избранного и формируем ожидаемый список Избранного
-        favorites_expected = []
-        for name, genre in books.items():
-            if genre == specific_genre:
-                collector.add_book_in_favorites(name)
-                favorites_expected.append(name)
+    def test_get_list_of_favorites_books_check_result(self, collector, specific_genre):
+        # инициализируем список Избранного
+        books_with_specific_genre = DataForTests.books_with_specific_genre[specific_genre]
+        collector.favorites = list(books_with_specific_genre)
 
         # получаем список Избранного и проверям правильность результата
-        assert collector.get_list_of_favorites_books() == favorites_expected
+        assert collector.get_list_of_favorites_books() == books_with_specific_genre
